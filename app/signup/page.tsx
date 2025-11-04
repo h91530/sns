@@ -89,7 +89,7 @@ export default function SignUp() {
               <label htmlFor="email" className="auth-label">이메일 주소</label>
               <input
                 id="email"
-                type="email"
+                type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="이메일 주소를 입력하세요"

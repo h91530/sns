@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     })
 
     // 쿠키 설정
-    response.cookies.set('user_id', user.id, {
+    response.cookies.set('user_id', user.id.toString(), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

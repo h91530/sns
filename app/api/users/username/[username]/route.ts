@@ -8,17 +8,17 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ username: string }> }
 ) {
   try {
-    const { id: userId } = await params
+    const { username } = await params
     const currentUserId = request.headers.get('x-user-id')
 
-    // 사용자 정보 조회
+    // 사용자 정보 조회 (username으로)
     const { data: user, error: userError } = await supabase
       .from('users')
       .select('id, email, username, avatar, bio, website, created_at')
-      .eq('id', userId)
+      .eq('username', username)
       .single()
 
     if (userError || !user) {
@@ -32,7 +32,7 @@ export async function GET(
     const { data: posts, error: postsError } = await supabase
       .from('posts')
       .select('id, title, content, image_url, created_at, likes_count')
-      .eq('user_id', userId)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
     if (postsError) {
@@ -58,53 +58,53 @@ export async function GET(
         liked: likedPostIds.has(post.id),
       }))
     } else if (posts) {
-      // 로그인하지 않은 경우 모든 게시물을 liked: false로 설정
       postsWithLikeStatus = posts.map(post => ({
         ...post,
         liked: false,
       }))
     }
 
-    // 팔로워 수 조회 (follows 테이블에서 follower_id가 현재 사용자인 경우)
+    // 팔로워 수 조회
     const { count: followersCount } = await supabase
       .from('follows')
-      .select('*', { count: 'exact', head: true })
-      .eq('following_id', userId)
+      .select('*', { count: 'exact' })
+      .eq('following_id', user.id)
 
-    // 팔로잉 수 조회 (follows 테이블에서 following_id가 현재 사용자인 경우)
+    // 팔로잉 수 조회
     const { count: followingCount } = await supabase
       .from('follows')
-      .select('*', { count: 'exact', head: true })
-      .eq('follower_id', userId)
+      .select('*', { count: 'exact' })
+      .eq('follower_id', user.id)
 
-    // 게시글 수 조회
-    const { count: postsCount } = await supabase
-      .from('posts')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-
-    // 현재 사용자가 이 사용자를 팔로우하고 있는지 확인
+    // 현재 사용자가 이 사용자를 팔로우하는지 확인
     let isFollowing = false
     if (currentUserId) {
       const { data: followData } = await supabase
         .from('follows')
         .select('id')
         .eq('follower_id', currentUserId)
-        .eq('following_id', userId)
+        .eq('following_id', user.id)
         .single()
+
       isFollowing = !!followData
     }
 
     return NextResponse.json({
-      ...user,
-      posts: postsWithLikeStatus,
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      avatar: user.avatar,
+      bio: user.bio,
+      website: user.website,
+      created_at: user.created_at,
       followers_count: followersCount || 0,
       following_count: followingCount || 0,
-      posts_count: postsCount || 0,
+      posts_count: posts?.length || 0,
+      posts: postsWithLikeStatus,
       is_following: isFollowing,
     })
   } catch (error) {
-    console.error('Error fetching user:', error)
+    console.error('Error:', error)
     return NextResponse.json(
       { message: '서버 오류가 발생했습니다' },
       { status: 500 }
@@ -112,68 +112,66 @@ export async function GET(
   }
 }
 
-// PUT: 사용자 프로필 업데이트
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ username: string }> }
 ) {
   try {
-    const { id: userId } = await params
+    const { username } = await params
     const currentUserId = request.headers.get('x-user-id')
 
-    // 자신의 프로필만 수정 가능
-    if (parseInt(currentUserId || '0') !== parseInt(userId)) {
+    if (!currentUserId) {
       return NextResponse.json(
-        { message: '자신의 프로필만 수정할 수 있습니다' },
-        { status: 403 }
+        { message: '인증이 필요합니다' },
+        { status: 401 }
       )
     }
 
     const { avatar, bio, website } = await request.json()
 
-    console.log('PUT endpoint - userId:', userId, 'currentUserId:', currentUserId)
-    console.log('Received data - avatar:', avatar, 'bio:', bio, 'website:', website)
+    // 자신의 프로필인지 확인
+    const { data: user } = await supabase
+      .from('users')
+      .select('id')
+      .eq('username', username)
+      .single()
 
-    // 업데이트할 데이터 구성
-    const updateData: any = {
-      bio: bio || '',
-      website: website || '',
-      updated_at: new Date().toISOString(),
+    if (parseInt(currentUserId) !== user?.id) {
+      return NextResponse.json(
+        { message: '권한이 없습니다' },
+        { status: 403 }
+      )
     }
-
-    // avatar 업데이트 (undefined가 아닌 경우만 포함)
-    if (avatar !== undefined) {
-      updateData.avatar = avatar || null
-    }
-
-    console.log('Update data:', updateData)
 
     // 프로필 업데이트
     const { data: updatedUser, error } = await supabase
       .from('users')
-      .update(updateData)
-      .eq('id', userId)
+      .update({
+        avatar,
+        bio,
+        website,
+      })
+      .eq('id', currentUserId)
       .select()
       .single()
 
     if (error) {
-      console.error('Supabase update error:', error)
       return NextResponse.json(
-        { message: '프로필 업데이트에 실패했습니다', error: error.message },
+        { message: '프로필 업데이트에 실패했습니다' },
         { status: 500 }
       )
     }
 
-    console.log('Updated user data:', updatedUser)
-
     return NextResponse.json({
-      ...updatedUser,
-      avatar: updatedUser.avatar || '',
-      bio: updatedUser.bio || '',
-      website: updatedUser.website || '',
+      id: updatedUser.id,
+      email: updatedUser.email,
+      username: updatedUser.username,
+      avatar: updatedUser.avatar,
+      bio: updatedUser.bio,
+      website: updatedUser.website,
     })
   } catch (error) {
-    console.error('Error updating user:', error)
+    console.error('Error:', error)
     return NextResponse.json(
       { message: '서버 오류가 발생했습니다' },
       { status: 500 }

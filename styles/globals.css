@@ -96,7 +96,7 @@ a {
 }
 
 a:hover {
-  color: var(--accent-light);
+  color: var(--accent);
 }
 
 /* ===== 버튼 ===== */
@@ -348,8 +348,7 @@ textarea::placeholder {
 
 /* ===== 포커스 스타일 ===== */
 *:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: none;
 }
 
 /* ===== 고대비 모드 ===== */

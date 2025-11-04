@@ -84,9 +84,9 @@ export default function Header() {
               </button>
             </Link>
             {user && (
-              <Link href={`/profile/${user.id}`}>
+              <Link href={`/profile/${user.username}`}>
                 <button className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
-                  pathname === `/profile/${user.id}` 
+                  pathname === `/profile/${user.username}` 
                     ? 'bg-gray-100 text-gray-900' 
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}>
@@ -136,9 +136,9 @@ export default function Header() {
               </button>
             </Link>
             {user && (
-              <Link href={`/profile/${user.id}`}>
+              <Link href={`/profile/${user.username}`}>
                 <button className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
-                  pathname === `/profile/${user.id}` 
+                  pathname === `/profile/${user.username}` 
                     ? 'bg-gray-100 text-gray-900' 
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}>

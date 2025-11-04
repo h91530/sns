@@ -110,6 +110,36 @@ export async function uploadImageFromUrl(imageUrl: string): Promise<UploadRespon
   }
 }
 
+// Cloudinary URL에서 public_id 추출
+export function extractPublicIdFromUrl(url: string): string | null {
+  // URL 형식: https://res.cloudinary.com/[cloud_name]/image/upload/[transformation]/[public_id].[format]
+  // 예: https://res.cloudinary.com/dwmx2kogx/image/upload/v1762215534/instagram-sns/kohex7gw64jnrpqoytpe.png
+
+  try {
+    const parts = url.split('/image/upload/')
+    if (parts.length !== 2) return null
+
+    const path = parts[1]
+    // v1762215534/instagram-sns/kohex7gw64jnrpqoytpe.png 에서
+    // instagram-sns/kohex7gw64jnrpqoytpe 추출
+
+    const pathParts = path.split('/')
+    // ['v1762215534', 'instagram-sns', 'kohex7gw64jnrpqoytpe.png']
+
+    if (pathParts.length >= 3) {
+      // 파일명에서 확장자 제거
+      const fileName = pathParts[pathParts.length - 1].split('.')[0]
+      const folder = pathParts[pathParts.length - 2]
+      return `${folder}/${fileName}`
+    }
+
+    return null
+  } catch (error) {
+    console.error('Failed to extract public_id:', error)
+    return null
+  }
+}
+
 // 이미지 삭제
 export async function deleteImage(publicId: string): Promise<void> {
   try {
@@ -118,15 +148,18 @@ export async function deleteImage(publicId: string): Promise<void> {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include', // 쿠키 포함
       body: JSON.stringify({ public_id: publicId }),
     });
 
     if (!response.ok) {
-      throw new Error('Delete failed');
+      const errorData = await response.json();
+      console.error('Delete failed:', response.status, errorData);
+      throw new Error(`Delete failed: ${response.status}`);
     }
   } catch (error) {
     console.error('Delete error:', error);
-    throw error;
+    // 삭제 실패는 조용히 처리 (계속 진행하도록)
   }
 }
 

@@ -49,7 +49,16 @@
       "Skill(example-skills:canvas-design)",
       "Bash(timeout 90 python:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git remote:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "mcp__supabase__get_logs",
+      "Bash(mv:*)",
+      "Bash(timeout 15 npm run dev -- -p 3000)",
+      "Bash(kill:*)",
+      "Bash(taskkill:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
