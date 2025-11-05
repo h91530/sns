@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     const userId = request.headers.get('x-user-id')
 
     // 필수 필드 검증
-    if (!userId || !image_url || !content) {
+    if (!userId || !content) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
