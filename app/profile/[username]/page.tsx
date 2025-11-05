@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Header from '@/components/Header'
@@ -26,6 +28,7 @@ interface Post {
   image_url: string | null
   created_at: string
   likes_count: number
+  liked?: boolean
 }
 
 interface FollowUser {
@@ -39,7 +42,7 @@ interface FollowUser {
 export default function ProfilePage() {
   const params = useParams()
   const { showAlert } = useAlert()
-  const username = params.username as string
+  const username = (params?.username as string) || ''
 
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [posts, setPosts] = useState<Post[]>([])

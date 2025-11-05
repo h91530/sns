@@ -15,6 +15,15 @@ const nextConfig = {
       },
     ],
   },
+  skipTrailingSlashRedirect: true,
+  skipMiddlewareUrlNormalize: true,
+  experimental: {
+    isrMemoryCacheSize: 0,
+  },
+  onDemandEntries: {
+    maxInactiveAge: 1000 * 60 * 60,
+    pagesBufferLength: 5,
+  },
 }
 
 module.exports = nextConfig

@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    let follows = []
+    let follows: any[] = []
 
     if (type === 'followers') {
       // 이 사용자를 팔로우하는 사람들
