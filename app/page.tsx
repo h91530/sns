@@ -89,6 +89,16 @@ export default function Home() {
             </Link>
           </div>
 
+          <div className="auth-link-text" style={{ marginTop: 'var(--space-md)' }}>
+            <Link href="/find-id" className="auth-link" style={{ marginRight: 'var(--space-sm)' }}>
+              아이디 찾기
+            </Link>
+            <span aria-hidden="true">·</span>
+            <Link href="/reset-password" className="auth-link" style={{ marginLeft: 'var(--space-sm)' }}>
+              비밀번호 찾기
+            </Link>
+          </div>
+
           <div className="auth-footer">
             © 2024 Yang. 모든 권리 보유.
           </div>

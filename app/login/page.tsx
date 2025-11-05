@@ -116,6 +116,15 @@ export default function Login() {
             >
               {loading ? '로그인 중...' : '로그인'}
             </button>
+
+            <div style={{ marginTop: 'var(--space-md)', display: 'flex', justifyContent: 'space-between', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
+              <Link href="/find-id" className="auth-link">
+                아이디를 잊으셨나요?
+              </Link>
+              <Link href="/reset-password" className="auth-link">
+                비밀번호를 잊으셨나요?
+              </Link>
+            </div>
           </form>
 
           <div className="auth-divider">

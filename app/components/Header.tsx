@@ -38,7 +38,7 @@ export default function Header() {
     }
   }
 
-  // 로그인 페이지나 회원가입 페이지에서는 헤더를 표시하지 않음
+  // 로그인, 회원가입, 랜딩 페이지에서는 헤더를 숨김 처리
   if (pathname === '/login' || pathname === '/signup' || pathname === '/') {
     return null
   }
@@ -50,6 +50,8 @@ export default function Header() {
   if (!user) {
     return null
   }
+
+  const isSettingsRoute = pathname?.startsWith('/settings')
 
   return (
     <header className="sticky top-0 bg-white border-b border-gray-200 z-50">
@@ -63,89 +65,121 @@ export default function Header() {
             <span className="text-lg font-semibold text-gray-900">Yang</span>
           </Link>
 
-          {/* 네비게이션 */}
+          {/* 내비게이션 */}
           <nav className="hidden md:flex items-center gap-1">
             <Link href="/feed">
-              <button className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
-                pathname === '/feed' 
-                  ? 'bg-gray-100 text-gray-900' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}>
+              <button
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
+                  pathname === '/feed'
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
                 홈
               </button>
             </Link>
             <Link href="/upload">
-              <button className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
-                pathname === '/upload' 
-                  ? 'bg-gray-100 text-gray-900' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}>
+              <button
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
+                  pathname === '/upload'
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
                 업로드
               </button>
             </Link>
-            {user && (
-              <Link href={`/profile/${user.username}`}>
-                <button className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
-                  pathname === `/profile/${user.username}` 
-                    ? 'bg-gray-100 text-gray-900' 
+            <Link href="/settings/password">
+              <button
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
+                  isSettingsRoute
+                    ? 'bg-gray-100 text-gray-900'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}>
-                  프로필
-                </button>
-              </Link>
-            )}
+                }`}
+              >
+                설정
+              </button>
+            </Link>
+            <Link href={`/profile/${user.username}`}>
+              <button
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
+                  pathname === `/profile/${user.username}`
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                프로필
+              </button>
+            </Link>
           </nav>
 
-          {/* 사용자 정보 */}
+          {/* 사용자 영역 */}
           <div className="flex items-center gap-3">
-            {user && (
-              <>
-                <span className="hidden sm:block text-sm text-gray-600 truncate max-w-32">
-                  {user.email}
-                </span>
-                <button
-                  onClick={handleLogout}
-                  className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors focus:outline-none"
-                >
-                  로그아웃
-                </button>
-              </>
-            )}
+            <span className="hidden sm:block text-sm text-gray-600 truncate max-w-32">
+              {user.email}
+            </span>
+            <Link
+              href="/settings/password"
+              className="hidden sm:inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors focus:outline-none"
+            >
+              비밀번호 변경
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors focus:outline-none"
+            >
+              로그아웃
+            </button>
           </div>
         </div>
 
-        {/* 모바일 네비게이션 */}
+        {/* 모바일 내비게이션 */}
         <nav className="md:hidden mt-3 pt-3 border-t border-gray-100">
           <div className="flex items-center justify-around">
             <Link href="/feed">
-              <button className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
-                pathname === '/feed' 
-                  ? 'bg-gray-100 text-gray-900' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}>
+              <button
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
+                  pathname === '/feed'
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
                 홈
               </button>
             </Link>
             <Link href="/upload">
-              <button className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
-                pathname === '/upload' 
-                  ? 'bg-gray-100 text-gray-900' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}>
+              <button
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
+                  pathname === '/upload'
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
                 업로드
               </button>
             </Link>
-            {user && (
-              <Link href={`/profile/${user.username}`}>
-                <button className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
-                  pathname === `/profile/${user.username}` 
-                    ? 'bg-gray-100 text-gray-900' 
+            <Link href="/settings/password">
+              <button
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
+                  isSettingsRoute
+                    ? 'bg-gray-100 text-gray-900'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}>
-                  프로필
-                </button>
-              </Link>
-            )}
+                }`}
+              >
+                설정
+              </button>
+            </Link>
+            <Link href={`/profile/${user.username}`}>
+              <button
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
+                  pathname === `/profile/${user.username}`
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                프로필
+              </button>
+            </Link>
           </div>
         </nav>
       </div>

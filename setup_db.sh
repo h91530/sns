@@ -7,9 +7,25 @@ PROJECT_ID="pkorpzicojwkxcaqlpru"
 echo "Adding profile columns to users table..."
 
 cat > /tmp/migration.sql << 'SQL'
-ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT DEFAULT 'https://via.placeholder.com/150?text=User';
-ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT '';
-ALTER TABLE users ADD COLUMN IF NOT EXISTS website TEXT DEFAULT '';
+create extension if not exists "pgcrypto";
+
+alter table users
+  add column if not exists avatar text default 'https://via.placeholder.com/150?text=User',
+  add column if not exists bio text default '',
+  add column if not exists website text default '';
+
+create table if not exists public.password_reset_tokens (
+  id uuid primary key default gen_random_uuid(),
+  user_id integer not null references public.users(id) on delete cascade,
+  token_hash text not null unique,
+  expires_at timestamptz not null,
+  used_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists password_reset_tokens_user_expires_idx
+  on public.password_reset_tokens (user_id, expires_at)
+  where used_at is null;
 SQL
 
 echo "Migration SQL created at /tmp/migration.sql"
