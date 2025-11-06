@@ -201,7 +201,7 @@ export async function GET(request: NextRequest) {
     let query = supabaseAdmin
       .from('user_inquiries')
       .select(
-        'id, title, content, status, response, created_at, responded_at, updated_at, attachments, image_url, last_viewed_at, status_changed_at'
+        'id, title, content, status, response, created_at, responded_at, updated_at, image_url, last_viewed_at, status_changed_at'
       )
       .eq('user_id', userId)
 
@@ -239,6 +239,8 @@ export async function POST(request: NextRequest) {
     const content = formData.get('content')
     const imageUrl = formData.get('image_url')
     const files = formData.getAll('attachments').filter((value): value is File => value instanceof File && value.size > 0)
+
+    console.log('Inquiry POST - userId:', userId, 'title:', title, 'content:', !!content, 'imageUrl:', !!imageUrl)
 
     const trimmedTitle = typeof title === 'string' ? title.trim() : ''
     const trimmedContent = typeof content === 'string' ? content.trim() : ''
@@ -283,6 +285,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    console.log('Inserting inquiry:', {
+      user_id: userId,
+      title: trimmedTitle,
+      content: trimmedContent,
+      status: 'pending',
+      image_url: typeof imageUrl === 'string' ? imageUrl : null,
+    })
+
     const { data, error } = await supabaseAdmin
       .from('user_inquiries')
       .insert([
@@ -291,26 +301,32 @@ export async function POST(request: NextRequest) {
           title: trimmedTitle,
           content: trimmedContent,
           status: 'pending',
-          attachments,
           image_url: typeof imageUrl === 'string' ? imageUrl : null,
           last_viewed_at: new Date().toISOString(),
         },
       ])
       .select(
-        'id, title, content, status, response, created_at, responded_at, updated_at, attachments, image_url, last_viewed_at, status_changed_at'
+        'id, title, content, status, response, created_at, responded_at, updated_at, image_url, last_viewed_at, status_changed_at'
       )
       .single()
 
     if (error || !data) {
-      console.error('Failed to create inquiry:', error)
+      console.error('Failed to create inquiry - Error:', error)
+      console.error('Failed to create inquiry - Data:', data)
       await cleanupUploadedFiles(attachments.map((item) => item.path))
       return NextResponse.json({ error: '문의 등록에 실패했습니다.' }, { status: 500 })
     }
+
+    console.log('Inquiry created successfully:', data.id)
 
     const inquiry = await formatInquiryRow(data)
     return NextResponse.json({ inquiry }, { status: 201 })
   } catch (exception) {
     console.error('Unexpected inquiry create error:', exception)
+    if (exception instanceof Error) {
+      console.error('Error message:', exception.message)
+      console.error('Error stack:', exception.stack)
+    }
     return NextResponse.json({ error: '문의 등록에 실패했습니다.' }, { status: 500 })
   }
 }
