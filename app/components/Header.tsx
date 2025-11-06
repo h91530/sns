@@ -9,6 +9,7 @@ export default function Header() {
   const pathname = usePathname()
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [unreadInquiries, setUnreadInquiries] = useState(0)
 
   useEffect(() => {
     const checkUser = async () => {
@@ -27,6 +28,28 @@ export default function Header() {
 
     checkUser()
   }, [pathname])
+
+  // 답변 대기 중인 문의 개수 조회
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch('/api/inquiries/unread-count')
+        if (response.ok) {
+          const data = await response.json()
+          setUnreadInquiries(data.count || 0)
+        }
+      } catch (error) {
+        console.error('Unread inquiries fetch error:', error)
+      }
+    }
+
+    if (user) {
+      fetchUnreadCount()
+      // 30초마다 업데이트
+      const interval = setInterval(fetchUnreadCount, 30000)
+      return () => clearInterval(interval)
+    }
+  }, [user])
 
   const handleLogout = async () => {
     try {
@@ -107,9 +130,14 @@ export default function Header() {
             </span>
             <Link
               href="/settings/inquiries"
-              className="hidden sm:inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors focus:outline-none"
+              className="hidden sm:inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors focus:outline-none relative"
             >
               1:1 문의
+              {unreadInquiries > 0 && (
+                <span className="ml-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
+                  {unreadInquiries > 9 ? '9+' : unreadInquiries}
+                </span>
+              )}
             </Link>
             <button
               onClick={handleLogout}
@@ -158,13 +186,18 @@ export default function Header() {
             </Link>
             <Link href="/settings/inquiries">
               <button
-                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none relative ${
                   pathname === '/settings/inquiries'
                     ? 'bg-gray-100 text-gray-900'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
                 1:1 문의
+                {unreadInquiries > 0 && (
+                  <span className="absolute top-1 right-1 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
+                    {unreadInquiries > 9 ? '9+' : unreadInquiries}
+                  </span>
+                )}
               </button>
             </Link>
           </div>
