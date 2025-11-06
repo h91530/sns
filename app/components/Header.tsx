@@ -51,8 +51,6 @@ export default function Header() {
     return null
   }
 
-  const isSettingsRoute = pathname?.startsWith('/settings')
-
   return (
     <header className="sticky top-0 bg-white border-b border-gray-200 z-50">
       <div className="max-w-4xl mx-auto px-4 py-4">
@@ -89,17 +87,6 @@ export default function Header() {
                 업로드
               </button>
             </Link>
-            <Link href="/settings/password">
-              <button
-                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
-                  isSettingsRoute
-                    ? 'bg-gray-100 text-gray-900'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                설정
-              </button>
-            </Link>
             <Link href={`/profile/${user.username}`}>
               <button
                 className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
@@ -119,10 +106,10 @@ export default function Header() {
               {user.email}
             </span>
             <Link
-              href="/settings/password"
+              href="/settings/inquiries"
               className="hidden sm:inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors focus:outline-none"
             >
-              비밀번호 변경
+              1:1 문의
             </Link>
             <button
               onClick={handleLogout}
@@ -158,17 +145,6 @@ export default function Header() {
                 업로드
               </button>
             </Link>
-            <Link href="/settings/password">
-              <button
-                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
-                  isSettingsRoute
-                    ? 'bg-gray-100 text-gray-900'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                설정
-              </button>
-            </Link>
             <Link href={`/profile/${user.username}`}>
               <button
                 className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
@@ -178,6 +154,17 @@ export default function Header() {
                 }`}
               >
                 프로필
+              </button>
+            </Link>
+            <Link href="/settings/inquiries">
+              <button
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
+                  pathname === '/settings/inquiries'
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                1:1 문의
               </button>
             </Link>
           </div>
