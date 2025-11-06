@@ -6,6 +6,7 @@ import { FormEvent, useCallback, useEffect, useState } from 'react'
 import Header from '@/components/Header'
 import { useAlert } from '@/context/AlertContext'
 import { uploadImage, deleteImage, extractPublicIdFromUrl } from '@/lib/cloudinary'
+import { fetchWithAuth } from '@/lib/auth'
 
 interface UserInquiry {
   id: string
@@ -83,7 +84,7 @@ export default function InquiriesPage() {
     setError('')
 
     try {
-      const response = await fetch('/api/inquiries', { credentials: 'include' })
+      const response = await fetchWithAuth('/api/inquiries')
       let payload: any = null
 
       try {
@@ -162,9 +163,8 @@ export default function InquiriesPage() {
         formData.append('image_url', imageUrl)
       }
 
-      const response = await fetch('/api/inquiries', {
+      const response = await fetchWithAuth('/api/inquiries', {
         method: 'POST',
-        credentials: 'include',
         body: formData,
       })
 
