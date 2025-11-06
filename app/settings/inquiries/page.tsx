@@ -17,7 +17,6 @@ interface UserInquiry {
   created_at: string
   responded_at?: string | null
   updated_at?: string | null
-  image_url?: string | null
 }
 
 const formatDateTime = (value?: string | null) => {
@@ -74,9 +73,6 @@ export default function InquiriesPage() {
   const [error, setError] = useState('')
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
-  const [image, setImage] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [uploadingImage, setUploadingImage] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
   const fetchInquiries = useCallback(async () => {
@@ -114,18 +110,6 @@ export default function InquiriesPage() {
     fetchInquiries()
   }, [fetchInquiries])
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setImage(file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
@@ -140,32 +124,15 @@ export default function InquiriesPage() {
     setSubmitting(true)
 
     try {
-      let imageUrl: string | null = null
-
-      // 이미지 업로드
-      if (image) {
-        setUploadingImage(true)
-        try {
-          imageUrl = await uploadImage(image)
-        } catch (uploadError) {
-          showAlert('이미지 업로드에 실패했습니다.', 'error')
-          setSubmitting(false)
-          setUploadingImage(false)
-          return
-        }
-        setUploadingImage(false)
-      }
-
-      const formData = new FormData()
-      formData.append('title', trimmedTitle)
-      formData.append('content', trimmedContent)
-      if (imageUrl) {
-        formData.append('image_url', imageUrl)
-      }
-
       const response = await fetchWithAuth('/api/inquiries', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: trimmedTitle,
+          content: trimmedContent,
+        }),
       })
 
       let payload: any = null
@@ -183,8 +150,6 @@ export default function InquiriesPage() {
       showAlert('문의가 등록되었습니다.', 'success')
       setTitle('')
       setContent('')
-      setImage(null)
-      setImagePreview(null)
       setError('')
 
       if (payload?.inquiry) {
@@ -241,47 +206,12 @@ export default function InquiriesPage() {
               <p className="mt-1 text-right text-xs text-gray-400">{content.length} / 2000</p>
             </div>
 
-            <div>
-              <label htmlFor="inquiry-image" className="block text-sm font-medium text-gray-700">
-                첨부 이미지 (선택사항)
-              </label>
-              <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 transition-colors">
-                <input
-                  id="inquiry-image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                  disabled={submitting || uploadingImage}
-                />
-                <label htmlFor="inquiry-image" className="cursor-pointer block">
-                  {imagePreview ? (
-                    <div className="space-y-2">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="max-h-32 mx-auto rounded-lg"
-                      />
-                      <p className="text-xs text-gray-500">다른 이미지를 선택하려면 클릭하세요</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium text-gray-900">이미지를 선택하세요</p>
-                      <p className="text-xs text-gray-500">또는 여기에 드래그하세요</p>
-                    </div>
-                  )}
-                </label>
-              </div>
-            </div>
-
             <div className="flex items-center justify-end gap-3">
               <button
                 type="button"
                 onClick={() => {
                   setTitle('')
                   setContent('')
-                  setImage(null)
-                  setImagePreview(null)
                 }}
                 className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 focus:outline-none disabled:opacity-60"
                 disabled={submitting}
@@ -334,15 +264,6 @@ export default function InquiriesPage() {
                       <span className={statusMeta.className}>{statusMeta.label}</span>
                     </div>
                     <p className="mt-3 whitespace-pre-line text-sm text-gray-700">{inquiry.content}</p>
-                    {inquiry.image_url && (
-                      <div className="mt-3">
-                        <img
-                          src={inquiry.image_url}
-                          alt="Inquiry attachment"
-                          className="max-h-48 rounded-lg"
-                        />
-                      </div>
-                    )}
                     {inquiry.response && (
                       <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
                         <p className="text-xs font-semibold text-gray-600">답변</p>

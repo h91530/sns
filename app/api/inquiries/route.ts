@@ -201,7 +201,7 @@ export async function GET(request: NextRequest) {
     let query = supabaseAdmin
       .from('user_inquiries')
       .select(
-        'id, title, content, status, response, created_at, responded_at, updated_at, image_url, last_viewed_at, status_changed_at'
+        'id, title, content, status, response, created_at, responded_at, updated_at, last_viewed_at'
       )
       .eq('user_id', userId)
 
@@ -234,13 +234,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const formData = await request.formData()
-    const title = formData.get('title')
-    const content = formData.get('content')
-    const imageUrl = formData.get('image_url')
-    const files = formData.getAll('attachments').filter((value): value is File => value instanceof File && value.size > 0)
+    const { title, content } = await request.json()
 
-    console.log('Inquiry POST - userId:', userId, 'title:', title, 'content:', !!content, 'imageUrl:', !!imageUrl)
+    console.log('Inquiry POST - userId:', userId, 'title:', title, 'content:', !!content)
 
     const trimmedTitle = typeof title === 'string' ? title.trim() : ''
     const trimmedContent = typeof content === 'string' ? content.trim() : ''
@@ -257,40 +253,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '내용은 2000자 이내로 작성해 주세요.' }, { status: 400 })
     }
 
-    let attachments: AttachmentRow[] = []
-
-    if (files.length) {
-      try {
-        attachments = await uploadAttachments(files, userId)
-      } catch (uploadError) {
-        if (uploadError instanceof Error) {
-          if (uploadError.message === 'TOO_MANY_ATTACHMENTS') {
-            return NextResponse.json(
-              { error: `첨부 파일은 최대 ${maxAttachmentCount}개까지 업로드할 수 있습니다.` },
-              { status: 400 }
-            )
-          }
-
-          if (uploadError.message === 'ATTACHMENT_TOO_LARGE') {
-            return NextResponse.json(
-              {
-                error: `첨부 파일은 파일당 ${(maxAttachmentSize / (1024 * 1024)).toFixed(1)}MB 이하로 업로드해 주세요.`,
-              },
-              { status: 400 }
-            )
-          }
-        }
-
-        return NextResponse.json({ error: '첨부 파일 업로드에 실패했습니다.' }, { status: 500 })
-      }
-    }
-
     console.log('Inserting inquiry:', {
       user_id: userId,
       title: trimmedTitle,
       content: trimmedContent,
       status: 'pending',
-      image_url: typeof imageUrl === 'string' ? imageUrl : null,
     })
 
     const { data, error } = await supabaseAdmin
@@ -301,12 +268,11 @@ export async function POST(request: NextRequest) {
           title: trimmedTitle,
           content: trimmedContent,
           status: 'pending',
-          image_url: typeof imageUrl === 'string' ? imageUrl : null,
           last_viewed_at: new Date().toISOString(),
         },
       ])
       .select(
-        'id, title, content, status, response, created_at, responded_at, updated_at, image_url, last_viewed_at, status_changed_at'
+        'id, title, content, status, response, created_at, responded_at, updated_at, last_viewed_at'
       )
       .single()
 
