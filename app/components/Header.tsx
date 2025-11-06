@@ -29,27 +29,25 @@ export default function Header() {
     checkUser()
   }, [pathname])
 
-  // 답변 대기 중인 문의 개수 조회
-  useEffect(() => {
-    const fetchUnreadCount = async () => {
-      try {
-        const response = await fetch('/api/inquiries/unread-count')
-        if (response.ok) {
-          const data = await response.json()
-          setUnreadInquiries(data.count || 0)
-        }
-      } catch (error) {
-        console.error('Unread inquiries fetch error:', error)
+  // 문의 배지 새로고침 함수
+  const refreshInquiryCount = async () => {
+    try {
+      const response = await fetch('/api/inquiries/unread-count')
+      if (response.ok) {
+        const data = await response.json()
+        setUnreadInquiries(data.count || 0)
       }
+    } catch (error) {
+      console.error('Unread inquiries fetch error:', error)
     }
+  }
 
+  // 페이지 전환시 문의 개수 새로고침
+  useEffect(() => {
     if (user) {
-      fetchUnreadCount()
-      // 30초마다 업데이트
-      const interval = setInterval(fetchUnreadCount, 30000)
-      return () => clearInterval(interval)
+      refreshInquiryCount()
     }
-  }, [user])
+  }, [user, pathname])
 
   const handleLogout = async () => {
     try {
