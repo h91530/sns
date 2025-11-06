@@ -128,6 +128,17 @@ export default function Header() {
             <span className="hidden sm:block text-sm text-gray-600 truncate max-w-32">
               {user.email}
             </span>
+            <Link href="/settings/faq">
+              <button
+                className={`hidden sm:block px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
+                  pathname === '/settings/faq'
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                FAQ
+              </button>
+            </Link>
             <Link
               href="/settings/inquiries"
               className="hidden sm:inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors focus:outline-none relative"
@@ -182,6 +193,17 @@ export default function Header() {
                 }`}
               >
                 프로필
+              </button>
+            </Link>
+            <Link href="/settings/faq">
+              <button
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
+                  pathname === '/settings/faq'
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                FAQ
               </button>
             </Link>
             <Link href="/settings/inquiries">
