@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import NotificationDropdown from './NotificationDropdown'
 
 export default function Header() {
   const router = useRouter()
@@ -124,29 +125,19 @@ export default function Header() {
           {/* 사용자 영역 */}
           <div className="flex items-center gap-3">
             <span className="hidden sm:block text-sm text-gray-600 truncate max-w-32">
-              {user.email}
+              {user.username}
             </span>
-            <Link href="/settings/faq">
+            <NotificationDropdown />
+            <Link href="/settings">
               <button
-                className={`hidden sm:block px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
-                  pathname === '/settings/faq'
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
+                  pathname && pathname.startsWith('/settings')
                     ? 'bg-gray-100 text-gray-900'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
-                FAQ
+                설정
               </button>
-            </Link>
-            <Link
-              href="/settings/inquiries"
-              className="hidden sm:inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors focus:outline-none relative"
-            >
-              1:1 문의
-              {unreadInquiries > 0 && (
-                <span className="ml-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
-                  {unreadInquiries > 9 ? '9+' : unreadInquiries}
-                </span>
-              )}
             </Link>
             <button
               onClick={handleLogout}
@@ -193,31 +184,15 @@ export default function Header() {
                 프로필
               </button>
             </Link>
-            <Link href="/settings/faq">
+            <Link href="/settings">
               <button
                 className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none ${
-                  pathname === '/settings/faq'
+                  pathname && pathname.startsWith('/settings')
                     ? 'bg-gray-100 text-gray-900'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
-                FAQ
-              </button>
-            </Link>
-            <Link href="/settings/inquiries">
-              <button
-                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none relative ${
-                  pathname === '/settings/inquiries'
-                    ? 'bg-gray-100 text-gray-900'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                1:1 문의
-                {unreadInquiries > 0 && (
-                  <span className="absolute top-1 right-1 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
-                    {unreadInquiries > 9 ? '9+' : unreadInquiries}
-                  </span>
-                )}
+                설정
               </button>
             </Link>
           </div>
